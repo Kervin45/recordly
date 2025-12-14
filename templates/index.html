@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recordly</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<h1>📘 Recordly</h1>
+<p>Simple record management system</p>
+
+<form method="POST" action="/records">
+    <input name="title" placeholder="Title" required>
+    <textarea name="content" placeholder="Content" required></textarea>
+    <input name="tags" placeholder="Tags (comma separated)">
+    <button type="submit">Save Record</button>
+</form>
+
+<hr>
+
+<h2>Saved Records</h2>
+
+{% for r in records %}
+<div class="card">
+    <h3>{{ r.title }}</h3>
+    <p>{{ r.content }}</p>
+    <small>{{ r.tags }}</small>
+</div>
+{% endfor %}
+
+</body>
+</html>

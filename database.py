@@ -1,12 +1,9 @@
 import sqlite3
 
-
 DB_NAME = "recordly.db"
 
-
-def create_connection(db_name=DB_NAME):
-    return sqlite3.connect(db_name)
-
+def create_connection():
+    return sqlite3.connect(DB_NAME)
 
 def create_tables(conn):
     cur = conn.cursor()
@@ -15,9 +12,7 @@ def create_tables(conn):
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             title TEXT NOT NULL,
             content TEXT NOT NULL,
-            tags TEXT,
-            created_at TEXT,
-            updated_at TEXT
+            tags TEXT
         )
     """)
     conn.commit()

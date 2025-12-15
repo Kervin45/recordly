@@ -1,32 +1,28 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Recordly</title>
-    <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
+{% extends "base.html" %}
 
-<h1>📘 Recordly</h1>
-<p>Simple record management system</p>
+{% block content %}
+<a href="/create" class="btn">+ New Record</a>
+<br><br>
 
-<form method="POST" action="/records">
-    <input name="title" placeholder="Title" required>
-    <textarea name="content" placeholder="Content" required></textarea>
-    <input name="tags" placeholder="Tags (comma separated)">
-    <button type="submit">Save Record</button>
-</form>
-
-<hr>
-
-<h2>Saved Records</h2>
-
-{% for r in records %}
-<div class="card">
-    <h3>{{ r.title }}</h3>
-    <p>{{ r.content }}</p>
-    <small>{{ r.tags }}</small>
-</div>
-{% endfor %}
-
-</body>
-</html>
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Content</th>
+        <th>Tags</th>
+        <th>Actions</th>
+    </tr>
+    {% for r in records %}
+    <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.title }}</td>
+        <td>{{ r.content }}</td>
+        <td>{{ r.tags }}</td>
+        <td>
+            <a href="/edit/{{ r.id }}">Edit</a>
+            <a href="/delete/{{ r.id }}">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form method="post">
+    <label>Title</label><br>
+    <input name="title" value="{{ record.title if record else '' }}" required><br><br>
+
+    <label>Content</label><br>
+    <textarea name="content" required>{{ record.content if record else '' }}</textarea><br><br>
+
+    <label>Tags</label><br>
+    <input name="tags" value="{{ record.tags if record else '' }}"><br><br>
+
+    <button class="btn">{{ action }}</button>
+</form>
+{% endblock %}

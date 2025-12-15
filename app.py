@@ -1,108 +1,66 @@
-from flask import Flask, request, render_template, redirect, jsonify
+from flask import Flask, render_template, request, redirect
 from database import create_connection, create_tables
 from crud import (
     create_record,
-    get_record,
     get_all_records,
+    get_record,
     update_record,
     delete_record
 )
 
 app = Flask(__name__)
 
-# -----------------------------
-# Database initialization
-# -----------------------------
-def get_db():
-    return create_connection()
+# init DB once
+conn = create_connection()
+create_tables(conn)
+conn.close()
 
-with get_db() as conn:
-    create_tables(conn)
-
-# -----------------------------
-# UI ROUTES
-# -----------------------------
-
-@app.route("/", methods=["GET"])
-def home():
-    conn = get_db()
+@app.route("/")
+def index():
+    conn = create_connection()
     records = get_all_records(conn)
     conn.close()
     return render_template("index.html", records=records)
 
+@app.route("/create", methods=["GET", "POST"])
+def create():
+    if request.method == "POST":
+        conn = create_connection()
+        create_record(
+            conn,
+            request.form["title"],
+            request.form["content"],
+            request.form.get("tags")
+        )
+        conn.close()
+        return redirect("/")
+    return render_template("form.html", action="Create")
 
-@app.route("/records", methods=["POST"])
-def add_record():
-    data = request.form
-    conn = get_db()
-    create_record(
-        conn,
-        data["title"],
-        data["content"],
-        data.get("tags")
-    )
+@app.route("/edit/<int:record_id>", methods=["GET", "POST"])
+def edit(record_id):
+    conn = create_connection()
+    record = get_record(conn, record_id)
+
+    if request.method == "POST":
+        update_record(
+            conn,
+            record_id,
+            request.form["title"],
+            request.form["content"],
+            request.form.get("tags")
+        )
+        conn.close()
+        return redirect("/")
+
+    conn.close()
+    return render_template("form.html", action="Edit", record=record)
+
+@app.route("/delete/<int:record_id>")
+def delete(record_id):
+    conn = create_connection()
+    delete_record(conn, record_id)
     conn.close()
     return redirect("/")
-
-
-# -----------------------------
-# API ROUTES (for learning / future)
-# -----------------------------
-
-@app.route("/api/records", methods=["GET"])
-def api_get_all():
-    conn = get_db()
-    records = get_all_records(conn)
-    conn.close()
-    return jsonify([r.to_dict() for r in records])
-
-
-@app.route("/api/records/<int:record_id>", methods=["GET"])
-def api_get_one(record_id):
-    conn = get_db()
-    record = get_record(conn, record_id)
-    conn.close()
-    if not record:
-        return jsonify({"error": "Not found"}), 404
-    return jsonify(record.to_dict())
-
-
-@app.route("/api/records", methods=["POST"])
-def api_create():
-    data = request.json
-    conn = get_db()
-    record = create_record(
-        conn,
-        data["title"],
-        data["content"],
-        data.get("tags")
-    )
-    conn.close()
-    return jsonify(record.to_dict()), 201
-
-
-@app.route("/api/records/<int:record_id>", methods=["PUT"])
-def api_update(record_id):
-    data = request.json
-    conn = get_db()
-    success = update_record(
-        conn,
-        record_id,
-        data["title"],
-        data["content"],
-        data.get("tags")
-    )
-    conn.close()
-    return jsonify({"updated": success})
-
-
-@app.route("/api/records/<int:record_id>", methods=["DELETE"])
-def api_delete(record_id):
-    conn = get_db()
-    success = delete_record(conn, record_id)
-    conn.close()
-    return jsonify({"deleted": success})
-
 
 if __name__ == "__main__":
     app.run(debug=True)
